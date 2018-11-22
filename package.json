@@ -4,6 +4,7 @@
   "description": "dingtalk-send",
   "private": true,
   "dependencies": {
+    "dateformat": "^3.0.3",
     "dingtalk-robot": "^1.0.3",
     "egg": "^2.2.1",
     "egg-dingtalk": "^2.0.0",

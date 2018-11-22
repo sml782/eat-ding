@@ -1,16 +1,131 @@
 'use strict';
 
-const robot = require('dingtalk-robot')('7ef51fc623081cfff22ce2dfa1f9ed0d90c22a5e046ef21bd763e78004c7c064');
+const dateFormat = require('dateformat');
+const robot = require('dingtalk-robot')('9c50a26167fe49c84323dfaf7394f056a2f420f30754d19c95b45423421dab5c');
 
 module.exports = app => {
   return {
     schedule: {
-      // cron: '0 45 11,18 ? * 2-6',
-      interval: '10s',
+      cron: '0 40 11,17 * * 1-5 *',
+      // cron: '0 40 * * * 1-5 *',
+      // interval: '2s',
       type: 'worker', // all 所有worker 都执行
     },
     async task(ctx) {
+      // const now = new Date();
+      // let _ss = (+now) % 1e3;
+      // _ss = ((1e3 + _ss) + '').substring(1);
       // app.logger.info('[task]: 任务开始');
+      // console.log(dateFormat(now, 'HH:MM:ss.') + _ss);
+
+      app.logger.info('[task]: 还有 5 分钟');
+      robot.send({
+        msgtype: 'text',
+        text: {
+          content: '距离吃饭时间还有 5 分钟，请大家做好准备！',
+        },
+        at: {
+          isAtAll: true,
+        },
+      }, function(err, data) {
+        if (err) {
+          app.logger.warn(`[task]: ${err}`);
+          return;
+        }
+        app.logger.info(`[task]: ${data}`);
+      });
+
+
+      const eattip = () => {
+        setTimeout(() => {
+          app.logger.info('[task]: 正式提醒');
+          robot.send({
+            msgtype: 'markdown',
+            markdown: {
+              title: '🍚吃饭⚠️',
+              text: '# 同志们\n' +
+                    '## 开饭了!!!!\n\n' +
+                    '![吃饭了](https://i01picsos.sogoucdn.com/8f6f41d5c02fb63f)\n\n' +
+                    '🏃  🏃  🏃  🏃  🏃\n\n' +
+                    '@所有人',
+            },
+            at: {
+              isAtAll: true,
+            },
+          }, function(err, data) {
+            if (err) {
+              app.logger.warn(`[task]: ${err}`);
+              return;
+            }
+            app.logger.info(`[task]: ${data}`);
+          });
+        }, 15000);
+      };
+
+
+      let timer;
+
+      let _s1 = 1;
+      const cycle2 = () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          app.logger.info('[task]: 还有45秒');
+          robot.send({
+            msgtype: 'text',
+            text: {
+              content: `距离吃饭时间还有 ${15 * (4 - _s1)} 秒`,
+            },
+            at: {
+              isAtAll: true,
+            },
+          }, function(err, data) {
+            if (err) {
+              app.logger.warn(`[task]: ${err}`);
+              return;
+            }
+            app.logger.info(`[task]: ${data}`);
+          });
+
+          _s1++;
+          if (_s1 < 4) {
+            cycle2();
+          } else {
+            eattip();
+          }
+        }, 15000);
+      };
+
+      let _s = 0;
+      const cycle1 = () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          app.logger.info(`[task]: 还有 ${4 - _s} 分钟`);
+          robot.send({
+            msgtype: 'text',
+            text: {
+              content: `距离吃饭时间还有 ${4 - _s} 分钟`,
+            },
+            at: {
+              isAtAll: true,
+            },
+          }, function(err, data) {
+            if (err) {
+              app.logger.warn(`[task]: ${err}`);
+              return;
+            }
+            app.logger.info(`[task]: ${data}`);
+          });
+
+          _s++;
+          if (_s < 4) {
+            cycle1();
+          } else {
+            cycle2();
+          }
+        }, 60000);
+      };
+
+      cycle1();
 
       // try {
       //   console.log('🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃🏃');
@@ -59,25 +174,25 @@ module.exports = app => {
       // });
 
       // TODO: markdown
-      robot.send({
-        msgtype: 'markdown',
-        markdown: {
-          title: '🍚吃饭⚠️',
-          text: '# 同志们\n' +
-                '## 开饭了!!!!\n\n' +
-                '![吃饭了](https://i01picsos.sogoucdn.com/8f6f41d5c02fb63f)\n' +
-                '@所有人',
-        },
-        at: {
-          isAtAll: true,
-        },
-      }, function(err, data) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log(data);
-      });
+      // robot.send({
+      //   msgtype: 'markdown',
+      //   markdown: {
+      //     title: '🍚吃饭⚠️',
+      //     text: '# 同志们\n' +
+      //           '## 开饭了!!!!\n\n' +
+      //           '![吃饭了](https://i01picsos.sogoucdn.com/8f6f41d5c02fb63f)\n\n' +
+      //           '@所有人',
+      //   },
+      //   at: {
+      //     isAtAll: true,
+      //   },
+      // }, function(err, data) {
+      //   if (err) {
+      //     console.error(err);
+      //     return;
+      //   }
+      //   console.log(data);
+      // });
     },
   };
 };
